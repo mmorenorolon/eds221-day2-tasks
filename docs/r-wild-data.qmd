@@ -1,0 +1,78 @@
+---
+title: "r-wild-data"
+author: Melannie Moreno Rolon
+format: html
+editor: visual
+---
+
+# Wild Data
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+#Load packages
+library(tidyverse)
+library(here)
+library(janitor)
+library(ggplot2)
+```
+
+```{r}
+#Load data
+mack_verts <- read_csv(here::here("data","AS00601.csv"))
+view(mack_verts)
+```
+
+```{r}
+#Update variables in lowercase snake
+mack_verts <- mack_verts %>% clean_names()
+```
+
+```{r}
+#Accessing individual pieces of the data frame
+mc_wt_5 <- mack_verts$weight[5]
+mc_length_8_20 <- mack_verts$length1[8:20]
+mc_dates <- mack_verts$sampledate
+```
+
+```{r}
+#Make a salamander subset
+mc_salamanders <- subset(mack_verts, species == "DITE")
+```
+
+```{r}
+#Salamander Scatter Plot
+salamander_size <- ggplot(data = mc_salamanders, aes(x = length1, y = weight)) +
+  geom_point(aes(colour = "brown"), size = 1, alpha = 0.5, show.legend = FALSE) +
+  theme_light() + 
+  labs(title = "Salamander Length vs Weight",
+       subtitle = expression("Measurments for the Pacific Giant Salamanders " * 
+                               italic("(Dicamptodon tenebrosus)")),
+       x = "Length (mm)",
+       y = "Weight (grams)",
+       caption = "Data from the H.J. Andrews Experimental Forest research program, supported by the NSF LTER Program (DEB 1440409), \nthe US Forest Service Pacific Northwest Research Station, and Oregon State University.")
+
+ggsave(here::here("figs", "salamander_size.png"), height = 5, width = 6)
+```
+
+```{r}
+#Make a trout subset
+mc_trout <- subset(mack_verts, species == "ONCL")
+mc_trout
+```
+
+```{r}
+#Identifying reach values
+unique(mc_trout$reach)
+
+#Trout Scatter Plot
+cutthroat_size <- ggplot(data = mc_trout, aes(x = length1, y = weight)) +
+  geom_point(aes(colour = reach), size = 1, show.legend = TRUE) +
+  theme_grey() + 
+  labs(title = "Trout Length vs Weight",
+        x = "Length (mm)",
+        y = "Weight (grams)") +
+  scale_color_manual(values = alpha(c("blue", "cyan2", "red"), 0.3)) + 
+  facet_wrap(~reach) 
+
+ggsave(here::here("figs", "cutthroat_size.png"), height = 5, width = 6)
+```
